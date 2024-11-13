@@ -8,13 +8,15 @@
     <!-- Link to external CSS file -->
     <link rel="stylesheet" href="style.css">
 
-    <!-- Firebase Scripts -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js"></script>
+    <!-- Firebase App (for core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    
+    <!-- Firebase Firestore -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
 
     <!-- Firebase Configuration and Initialization -->
     <script>
-        // Your web app's Firebase configuration
+        // Your Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCfg-FiRESdmwkOhjXeoF7ceiM46TzJ8I0",
             authDomain: "word-game-leaderboard-13641.firebaseapp.com",
@@ -26,7 +28,7 @@
         };
 
         // Initialize Firebase and Firestore
-        const app = firebase.initializeApp(firebaseConfig);
+        firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
     </script>
 </head>
@@ -66,7 +68,7 @@
         // Function to submit the score to Firestore
         function submitScore() {
             const playerName = document.getElementById("player-name").value;
-            const score = 100; // Replace with actual game score
+            const score = 100; // Replace with the actual game score if available
 
             db.collection("leaderboard").add({
                 name: playerName,
