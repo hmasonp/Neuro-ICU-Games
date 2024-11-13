@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neuro ICU Word Games</title>
+
+    <!-- Link to external CSS file -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js"></script>
+
+    <!-- Firebase Configuration and Initialization -->
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCfg-FiRESdmwkOhjXeoF7ceiM46TzJ8I0",
+            authDomain: "word-game-leaderboard-13641.firebaseapp.com",
+            projectId: "word-game-leaderboard-13641",
+            storageBucket: "word-game-leaderboard-13641.appspot.com",
+            messagingSenderId: "543524100206",
+            appId: "1:543524100206:web:4bcc7845bf637748402e7f",
+            measurementId: "G-SDBZ3H3M6Y"
+        };
+
+        // Initialize Firebase and Firestore
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+    </script>
+</head>
+<body>
+    <h1>Neuro ICU Word Games</h1>
+    <p>Challenge yourself with a new game each week!</p>
+
+    <!-- Embedded Game -->
+    <div class="game-container">
+        <iframe src="https://connections.swellgarfo.com/game/-OBaUYbjhGlV5nukwj9t" width="800" height="600" style="border:none;"></iframe>
+    </div>
+
+    <!-- Links for Archive and Completion Simulation -->
+    <a href="archive.html">Archive</a>
+    <button onclick="showCompletionPopup()">Simulate Game Completion</button>
+
+    <!-- Form for Entering Name and Score -->
+    <div id="completion-popup">
+        <p>Congratulations on finishing the game!</p>
+        <label for="player-name">Enter your name:</label>
+        <input type="text" id="player-name" required>
+        <button onclick="submitScore()">Submit Score</button>
+    </div>
+
+    <!-- Leaderboard Display -->
+    <div id="leaderboard-container">
+        <h2>Leaderboard</h2>
+        <ol id="leaderboard-list"></ol> <!-- Ordered list to show scores in order -->
+    </div>
+
+    <!-- JavaScript Functions for Submitting and Displaying Scores -->
+    <script>
+        // Function to show the completion popup
+        function showCompletionPopup() {
+            document.getElementById("completion-popup").style.display = "block";
+        }
+
+        // Function to submit the score to Firestore
+        function submitScore() {
+            const playerName = document.getElementById("player-name").value;
+            const score = 100; // Replace with actual game score
+
+            db.collection("leaderboard").add({
+                name: playerName,
+                score: score,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            })
+            .then(() => {
+                console.log("Score successfully added!");
+                displayLeaderboard();
+                document.getElementById("completion-popup").style.display = "none";
+            })
+            .catch((error) => {
+                console.error("Error adding score: ", error);
+            });
+        }
+
+        // Function to retrieve and display leaderboard data from Firestore in order
+        function displayLeaderboard() {
+            const leaderboardList = document.getElementById("leaderboard-list");
+            leaderboardList.innerHTML = "";
+
+            db.collection("leaderboard")
+                .orderBy("score", "desc")
+                .limit(10)
+                .get()
+                .then((querySnapshot) => {
+                    querySnapshot.forEach((doc) => {
+                        const player = doc.data();
+                        const listItem = document.createElement("li");
+                        listItem.textContent = `${player.name}: ${player.score} points`;
+                        leaderboardList.appendChild(listItem);
+                    });
+                })
+                .catch((error) => {
+                    console.error("Error retrieving leaderboard: ", error);
+                });
+        }
+
+        // Display leaderboard on page load
+        displayLeaderboard();
+    </script>
+</body>
+</html>
