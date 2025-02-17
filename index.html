@@ -87,30 +87,32 @@
             });
         }
 
-        // Function to retrieve and display leaderboard data from Firestore in order
-        function displayLeaderboard() {
-            const leaderboardList = document.getElementById("leaderboard-list");
-            leaderboardList.innerHTML = "";
+       // Function to retrieve and display leaderboard data from Firestore (real-time, all scores)
+function displayLeaderboard() {
+    const leaderboardList = document.getElementById("leaderboard-list");
+    leaderboardList.innerHTML = "";
 
-            db.collection("leaderboard")
-                .orderBy("score", "desc")
-                .limit(10)
-                .get()
-                .then((querySnapshot) => {
-                    querySnapshot.forEach((doc) => {
-                        const player = doc.data();
-                        const listItem = document.createElement("li");
-                        listItem.textContent = `${player.name}: ${player.score} points`;
-                        leaderboardList.appendChild(listItem);
-                    });
-                })
-                .catch((error) => {
-                    console.error("Error retrieving leaderboard: ", error);
-                });
-        }
+    db.collection("leaderboard")
+        .orderBy("score", "desc") // Order by highest score
+        .onSnapshot((snapshot) => {
+            leaderboardList.innerHTML = ""; // Clear previous list
+            if (snapshot.empty) {
+                leaderboardList.innerHTML = "<p>No scores yet!</p>"; // Handle empty leaderboard
+                return;
+            }
+            snapshot.forEach((doc) => {
+                const player = doc.data();
+                const listItem = document.createElement("li");
+                listItem.textContent = `${player.name}: ${player.score} points`;
+                leaderboardList.appendChild(listItem);
+            });
+        }, (error) => {
+            console.error("Error retrieving leaderboard: ", error);
+        });
+}
 
-        // Display leaderboard on page load
-        displayLeaderboard();
+// Display leaderboard on page load
+displayLeaderboard();
     </script>
 </body>
 </html>
