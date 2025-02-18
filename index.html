@@ -68,24 +68,52 @@
         }
 
         // Function to submit the score to Firestore
-        function submitScore() {
-            const playerName = document.getElementById("player-name").value;
-            const score = 100; // Replace with the actual game score if available
+function submitScore() {
+    const playerName = document.getElementById("player-name").value.trim();
+    const score = 100; // Replace with the actual game score if available
 
-            db.collection("leaderboard").add({
-                name: playerName,
-                score: score,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            })
-            .then(() => {
-                console.log("Score successfully added!");
-                displayLeaderboard();
-                document.getElementById("completion-popup").style.display = "none";
-            })
-            .catch((error) => {
-                console.error("Error adding score: ", error);
-            });
-        }
+    if (!playerName) {
+        alert("Please enter your name!");
+        return;
+    }
+
+    // Reference to the leaderboard collection
+    const leaderboardRef = db.collection("leaderboard");
+
+    // Check if a document with this name already exists
+    leaderboardRef.where("name", "==", playerName)
+        .get()
+        .then((querySnapshot) => {
+            if (!querySnapshot.empty) {
+                // Name found, update the existing score
+                const doc = querySnapshot.docs[0];
+                const currentScore = doc.data().score;
+                const newScore = currentScore + score;
+
+                // Update the existing document
+                leaderboardRef.doc(doc.id).update({ score: newScore })
+                    .then(() => {
+                        console.log(`Score updated for ${playerName}`);
+                        document.getElementById("completion-popup").style.display = "none";
+                    })
+                    .catch((error) => console.error("Error updating score: ", error));
+            } else {
+                // Name not found, add a new document
+                leaderboardRef.add({
+                    name: playerName,
+                    score: score,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                })
+                .then(() => {
+                    console.log(`New score added for ${playerName}`);
+                    document.getElementById("completion-popup").style.display = "none";
+                })
+                .catch((error) => console.error("Error adding score: ", error));
+            }
+        })
+        .catch((error) => console.error("Error checking for existing player: ", error));
+}
+
 
        // Function to retrieve and display leaderboard data from Firestore (real-time, all scores)
 function displayLeaderboard() {
