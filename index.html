@@ -43,13 +43,16 @@
     <p>Challenge yourself with a new game each week!</p>
 
     <!-- Embedded Game -->
-    <div style="position: relative; text-align: center;">
-        <div class="pm-embed-div" data-id="934682e7" data-set="6ae01e226fbeedae5704dcb88822efc5c1ab909c017230f59b6cf3e4887b825a" data-puzzleType="crossword" data-height="700px" data-mobileMargin="10px" data-onComplete="showCompletionPopup"></div>
-        <div class="pm-attribution-div" style="font-family: sans-serif; font-size: 12px; color: rgb(102, 102, 102); position: absolute; top: 100%; left: 50%; transform: translate(-50%, 0px); padding-top: 5px; width: 100%;">Built with the free <a href="https://amuselabs.com/games/crossword/" target="_blank" style="color: #666666; text-decoration: underline;">crossword puzzle creator</a> from Amuse Labs</div>
+    <div style="position: relative; text-align: center; margin-bottom: 20px;">
+        <div class="pm-embed-div" data-id="934682e7" data-set="6ae01e226fbeedae5704dcb88822efc5c1ab909c017230f59b6cf3e4887b825a" data-puzzleType="crossword" data-height="700px" data-mobileMargin="10px"></div>
+        <div class="pm-attribution-div" style="font-family: sans-serif; font-size: 12px; color: rgb(102, 102, 102); position: relative; padding-top: 5px; width: 100%;">Built with the free <a href="https://amuselabs.com/games/crossword/" target="_blank" style="color: #666666; text-decoration: underline;">crossword puzzle creator</a> from Amuse Labs</div>
     </div>
 
+    <!-- Button for Manually Confirming Completion -->
+    <button style="display: block; margin: 20px auto; padding: 10px 20px; font-size: 16px;" onclick="showCompletionPopup()">I Completed the Game</button>
+
     <!-- Form for Entering Name and Score -->
-    <div id="completion-popup" style="display:none;">
+    <div id="completion-popup" style="display:none; text-align: center; margin-top: 20px;">
         <p>Congratulations on finishing the game!</p>
         <p>Please use the same name each week if you'd like your scores to be tracked.</p>
         <label for="player-name">Enter your name:</label>
