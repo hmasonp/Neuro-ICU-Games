@@ -16,7 +16,6 @@
 
     <!-- Firebase Configuration and Initialization -->
     <script>
-        // Your Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCfg-FiRESdmwkOhjXeoF7ceiM46TzJ8I0",
             authDomain: "word-game-leaderboard-13641.firebaseapp.com",
@@ -26,10 +25,17 @@
             appId: "1:543524100206:web:4bcc7845bf637748402e7f",
             measurementId: "G-SDBZ3H3M6Y"
         };
-
-        // Initialize Firebase and Firestore
+        
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+    </script>
+    
+    <!-- Include CryptoJS library for hashing user ID -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <!-- Include the PuzzleMe embed script -->
+    <script id="pm-script" src="https://puzzleme.amuselabs.com/pmm/js/puzzleme-embed.js"></script>
+    <script>
+        PM_Config.PM_BasePath = "https://puzzleme.amuselabs.com/pmm/";
     </script>
 </head>
 <body>
@@ -37,8 +43,9 @@
     <p>Challenge yourself with a new game each week!</p>
 
     <!-- Embedded Game -->
-    <div class="game-container">
-        <iframe src="https://strandstudio.thegoodboi.net/play?id=KJPKN6" width="800" height="600" style="border:none;"></iframe>
+    <div style="position: relative; text-align: center;">
+        <div class="pm-embed-div" data-id="934682e7" data-set="6ae01e226fbeedae5704dcb88822efc5c1ab909c017230f59b6cf3e4887b825a" data-puzzleType="crossword" data-height="700px" data-mobileMargin="10px"></div>
+        <div class="pm-attribution-div" style="font-family: sans-serif; font-size: 12px; color: rgb(102, 102, 102); position: absolute; top: 100%; left: 50%; transform: translate(-50%, 0px); padding-top: 5px; width: 100%;">Built with the free <a href="https://amuselabs.com/games/crossword/" target="_blank" style="color: #666666; text-decoration: underline;">crossword puzzle creator</a> from Amuse Labs</div>
     </div>
 
     <!-- Button for Manually Confirming Completion -->
@@ -47,7 +54,6 @@
     <!-- Form for Entering Name and Score -->
     <div id="completion-popup" style="display:none;">
         <p>Congratulations on finishing the game!</p>
-        <!-- New reminder message -->
         <p>Please use the same name each week if you'd like your scores to be tracked.</p>
         <label for="player-name">Enter your name:</label>
         <input type="text" id="player-name" required>
@@ -57,90 +63,78 @@
     <!-- Leaderboard Display -->
     <div id="leaderboard-container">
         <h2>Leaderboard</h2>
-        <ol id="leaderboard-list"></ol> <!-- Ordered list to show scores in order -->
+        <ol id="leaderboard-list"></ol>
     </div>
 
-    <!-- JavaScript Functions for Submitting and Displaying Scores -->
     <script>
-        // Function to show the completion popup
         function showCompletionPopup() {
             document.getElementById("completion-popup").style.display = "block";
         }
 
-        // Function to submit the score to Firestore
-function submitScore() {
-    const playerName = document.getElementById("player-name").value.trim();
-    const score = 100; // Replace with the actual game score if available
+        function submitScore() {
+            const playerName = document.getElementById("player-name").value.trim();
+            const score = 100;
 
-    if (!playerName) {
-        alert("Please enter your name!");
-        return;
-    }
-
-    // Reference to the leaderboard collection
-    const leaderboardRef = db.collection("leaderboard");
-
-    // Check if a document with this name already exists
-    leaderboardRef.where("name", "==", playerName)
-        .get()
-        .then((querySnapshot) => {
-            if (!querySnapshot.empty) {
-                // Name found, update the existing score
-                const doc = querySnapshot.docs[0];
-                const currentScore = doc.data().score;
-                const newScore = currentScore + score;
-
-                // Update the existing document
-                leaderboardRef.doc(doc.id).update({ score: newScore })
-                    .then(() => {
-                        console.log(`Score updated for ${playerName}`);
-                        document.getElementById("completion-popup").style.display = "none";
-                    })
-                    .catch((error) => console.error("Error updating score: ", error));
-            } else {
-                // Name not found, add a new document
-                leaderboardRef.add({
-                    name: playerName,
-                    score: score,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                })
-                .then(() => {
-                    console.log(`New score added for ${playerName}`);
-                    document.getElementById("completion-popup").style.display = "none";
-                })
-                .catch((error) => console.error("Error adding score: ", error));
-            }
-        })
-        .catch((error) => console.error("Error checking for existing player: ", error));
-}
-
-
-       // Function to retrieve and display leaderboard data from Firestore (real-time, all scores)
-function displayLeaderboard() {
-    const leaderboardList = document.getElementById("leaderboard-list");
-    leaderboardList.innerHTML = "";
-
-    db.collection("leaderboard")
-        .orderBy("score", "desc") // Order by highest score
-        .onSnapshot((snapshot) => {
-            leaderboardList.innerHTML = ""; // Clear previous list
-            if (snapshot.empty) {
-                leaderboardList.innerHTML = "<p>No scores yet!</p>"; // Handle empty leaderboard
+            if (!playerName) {
+                alert("Please enter your name!");
                 return;
             }
-            snapshot.forEach((doc) => {
-                const player = doc.data();
-                const listItem = document.createElement("li");
-                listItem.textContent = `${player.name}: ${player.score} points`;
-                leaderboardList.appendChild(listItem);
-            });
-        }, (error) => {
-            console.error("Error retrieving leaderboard: ", error);
-        });
-}
 
-// Display leaderboard on page load
-displayLeaderboard();
+            const leaderboardRef = db.collection("leaderboard");
+
+            leaderboardRef.where("name", "==", playerName)
+                .get()
+                .then((querySnapshot) => {
+                    if (!querySnapshot.empty) {
+                        const doc = querySnapshot.docs[0];
+                        const currentScore = doc.data().score;
+                        const newScore = currentScore + score;
+                        leaderboardRef.doc(doc.id).update({ score: newScore })
+                            .then(() => {
+                                console.log(`Score updated for ${playerName}`);
+                                document.getElementById("completion-popup").style.display = "none";
+                            })
+                            .catch((error) => console.error("Error updating score: ", error));
+                    } else {
+                        leaderboardRef.add({
+                            name: playerName,
+                            score: score,
+                            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                        })
+                        .then(() => {
+                            console.log(`New score added for ${playerName}`);
+                            document.getElementById("completion-popup").style.display = "none";
+                        })
+                        .catch((error) => console.error("Error adding score: ", error));
+                    }
+                })
+                .catch((error) => console.error("Error checking for existing player: ", error));
+        }
+
+        function displayLeaderboard() {
+            const leaderboardList = document.getElementById("leaderboard-list");
+            leaderboardList.innerHTML = "";
+
+            db.collection("leaderboard")
+                .orderBy("score", "desc")
+                .onSnapshot((snapshot) => {
+                    leaderboardList.innerHTML = "";
+                    if (snapshot.empty) {
+                        leaderboardList.innerHTML = "<p>No scores yet!</p>";
+                        return;
+                    }
+                    snapshot.forEach((doc) => {
+                        const player = doc.data();
+                        const listItem = document.createElement("li");
+                        listItem.textContent = `${player.name}: ${player.score} points`;
+                        leaderboardList.appendChild(listItem);
+                    });
+                }, (error) => {
+                    console.error("Error retrieving leaderboard: ", error);
+                });
+        }
+
+        displayLeaderboard();
     </script>
 </body>
 </html>
